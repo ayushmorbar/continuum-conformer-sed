@@ -1,0 +1,17 @@
+# Smoke Test Configuration for Pipeline Verification
+experiment_name: "mf_conformer_smoke_run"
+dataset:
+  dummy_mode: true # Set to false next week when DESED is downloaded
+  num_samples: 100
+  seq_len: 128
+  mel_bins: 64
+model:
+  d_model: 144
+  num_heads: 4
+  num_classes: 10
+  c_event: 10   # Theta chunk size
+  c_scene: 50   # Delta chunk size
+training:
+  batch_size: 16
+  epochs: 3
+  lr: 0.001
