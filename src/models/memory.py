@@ -22,13 +22,17 @@ class NeuralMemoryModule(nn.Module):
             nn.Sigmoid() # Forgetting gate
         )
 
+        # Output normalisation: ensures retrieved features stay on the
+        # same activation scale as the incoming residual stream.
+        self.out_norm = nn.LayerNorm(d_model)
+
     def forward(self, x, current_step, M_prev=None, S_prev=None):
         B, T, D = x.shape
         device = x.device
         
         if M_prev is None:
             # Initialize identity memory state
-            M_prev = torch.eye(D, device=device).unsqueeze(0).expand(B, -1, -1)
+            M_prev = torch.eye(D, device=device).unsqueeze(0).expand(B, -1, -1).clone()
         if S_prev is None:
             S_prev = torch.zeros_like(M_prev)
 
@@ -53,6 +57,6 @@ class NeuralMemoryModule(nn.Module):
         else:
             M_t, S_t = M_prev, S_prev
             
-        # Standard retrieval
-        out = torch.matmul(x, M_t)
+        # Retrieval + output normalisation for residual stability
+        out = self.out_norm(torch.matmul(x, M_t))
         return out, M_t, S_t
